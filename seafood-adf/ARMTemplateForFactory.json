@@ -179,7 +179,7 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobFSLocation",
-						"fileName": "seafood_export_analysis.csv",
+						"fileName": "ukestat-hvitfiskprodukter-uke-18.xlsx",
 						"folderPath": "norwegian-seafood",
 						"fileSystem": "raw-data"
 					},
@@ -232,6 +232,36 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DailySeafoodProcessing')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "SeafoodDataProcessingPipeline",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2025-09-15T13:58:00",
+						"timeZone": "W. Europe Standard Time"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/SeafoodDataProcessingPipeline')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/integrationRuntime1')]",
