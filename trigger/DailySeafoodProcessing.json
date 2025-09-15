@@ -1,0 +1,24 @@
+{
+	"name": "DailySeafoodProcessing",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "SeafoodDataProcessingPipeline",
+					"type": "PipelineReference"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2025-09-15T13:58:00",
+				"timeZone": "W. Europe Standard Time"
+			}
+		}
+	}
+}
