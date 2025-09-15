@@ -1,0 +1,117 @@
+# Power BI Dashboard Configuration for Norwegian Seafood Analysis
+
+## Dashboard Overview
+This Power BI dashboard provides comprehensive visualization of Norwegian Seafood Council export data processed through Azure Data Factory.
+
+## Data Sources
+- **Primary**: Azure SQL Database (SeafoodExportAnalysis table)
+- **Secondary**: Azure Data Lake Storage (processed CSV files)
+- **Refresh**: Daily via ADF pipeline
+
+## Key Visualizations
+
+### 1. Executive Summary
+- **Total Export Volume** (KPI card)
+- **Volume Growth Rate** (KPI card with trend)
+- **Average Price** (KPI card)
+- **Price Change** (KPI card with trend)
+
+### 2. Market Analysis
+- **Top 10 Markets by Volume** (Horizontal bar chart)
+- **Market Share Distribution** (Pie chart)
+- **Market Growth Analysis** (Scatter plot)
+- **Price vs Volume Analysis** (Bubble chart)
+
+### 3. Category Performance
+- **Category Breakdown** (Stacked bar chart)
+- **Category Price Trends** (Line chart)
+- **Category Volume Trends** (Area chart)
+
+### 4. Time Series Analysis
+- **Weekly Volume Trends** (Line chart with dual axis)
+- **Price Trends by Category** (Multi-line chart)
+- **Growth Rate Trends** (Column chart)
+
+### 5. Geographic Analysis
+- **Market Map** (Map visualization)
+- **Regional Performance** (Treemap)
+- **Export Distribution** (Funnel chart)
+
+## Filters and Slicers
+- **Date Range** (Week selection)
+- **Category** (Multi-select)
+- **Market** (Multi-select with search)
+- **Volume Range** (Slider)
+- **Price Range** (Slider)
+
+## Measures and Calculations
+
+### Key Measures
+```DAX
+Total Volume = SUM(SeafoodExportAnalysis[Current_Week_Volume])
+Previous Year Volume = SUM(SeafoodExportAnalysis[Previous_Year_Volume])
+Volume Growth % = DIVIDE([Total Volume] - [Previous Year Volume], [Previous Year Volume]) * 100
+Average Price = AVERAGE(SeafoodExportAnalysis[Current_Week_Price])
+Price Change % = DIVIDE([Average Price] - AVERAGE(SeafoodExportAnalysis[Previous_Year_Price]), AVERAGE(SeafoodExportAnalysis[Previous_Year_Price])) * 100
+```
+
+### Advanced Measures
+```DAX
+Top Market = 
+CALCULATE(
+    FIRSTNONBLANK(SeafoodExportAnalysis[Market], 1),
+    TOPN(1, VALUES(SeafoodExportAnalysis[Market]), [Total Volume], DESC)
+)
+
+Market Share % = 
+DIVIDE([Total Volume], CALCULATE([Total Volume], ALL(SeafoodExportAnalysis[Market]))) * 100
+
+YTD Volume = SUM(SeafoodExportAnalysis[YTD_Current_Volume])
+YTD Growth % = DIVIDE([YTD Volume] - SUM(SeafoodExportAnalysis[YTD_Previous_Volume]), SUM(SeafoodExportAnalysis[YTD_Previous_Volume])) * 100
+```
+
+## Data Model Relationships
+- **SeafoodExportAnalysis** (Fact table)
+- **MarketSummary** (Dimension table)
+- **CategorySummary** (Dimension table)
+- **WeeklySummary** (Dimension table)
+
+## Refresh Schedule
+- **Frequency**: Daily at 6:00 AM UTC
+- **Source**: Azure Data Factory pipeline
+- **Method**: DirectQuery for real-time data
+
+## Security and Access
+- **Row-level security**: Based on user roles
+- **Data sensitivity**: Public data (Norwegian Seafood Council)
+- **Access levels**: Read-only for most users, Edit for administrators
+
+## Mobile Optimization
+- **Responsive design**: Optimized for mobile devices
+- **Key metrics**: Prioritized for mobile viewing
+- **Touch-friendly**: Large buttons and clear navigation
+
+## Export and Sharing
+- **PDF export**: Available for reports
+- **Excel export**: Raw data access
+- **PowerPoint**: Presentation-ready slides
+- **Embedded**: Can be embedded in other applications
+
+## Alerts and Notifications
+- **Volume threshold**: Alert when volume drops below 80% of previous year
+- **Price alerts**: Notify when price changes exceed 20%
+- **Data quality**: Alert when processing fails
+- **Growth alerts**: Notify when growth rate changes significantly
+
+## Performance Optimization
+- **Aggregations**: Pre-calculated measures
+- **Indexing**: Optimized database indexes
+- **Caching**: Strategic use of DirectQuery and Import modes
+- **Compression**: Data compression for large datasets
+
+## Future Enhancements
+- **Predictive analytics**: Forecast future trends
+- **Machine learning**: Anomaly detection
+- **Real-time streaming**: Live data updates
+- **Advanced visualizations**: Custom charts and graphs
+

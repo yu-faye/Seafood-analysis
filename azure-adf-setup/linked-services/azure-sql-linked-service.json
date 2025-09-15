@@ -1,0 +1,28 @@
+{
+  "name": "AzureSqlDatabase",
+  "properties": {
+    "type": "AzureSqlDatabase",
+    "typeProperties": {
+      "connectionString": "Server=tcp:@linkedService().sqlServerName.database.windows.net,1433;Initial Catalog=@linkedService().sqlDatabaseName;Persist Security Info=False;User ID=@linkedService().sqlUsername;Password=@linkedService().sqlPassword;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;",
+      "password": {
+        "type": "SecureString",
+        "value": "@linkedService().sqlPassword"
+      }
+    },
+    "parameters": {
+      "sqlServerName": {
+        "type": "string"
+      },
+      "sqlDatabaseName": {
+        "type": "string"
+      },
+      "sqlUsername": {
+        "type": "string"
+      },
+      "sqlPassword": {
+        "type": "string"
+      }
+    }
+  }
+}
+

@@ -1,0 +1,83 @@
+{
+  "name": "ProcessedSeafoodData",
+  "properties": {
+    "type": "DelimitedText",
+    "typeProperties": {
+      "location": {
+        "type": "AzureBlobFSLocation",
+        "fileSystem": "processed-data",
+        "folderPath": "norwegian-seafood",
+        "fileName": "seafood_export_analysis.csv"
+      },
+      "columnDelimiter": ",",
+      "rowDelimiter": "\n",
+      "encoding": "UTF-8",
+      "escapeChar": "\\",
+      "firstRowAsHeader": true,
+      "quoteChar": "\""
+    },
+    "linkedServiceName": {
+      "referenceName": "AzureDataLakeStorageGen2",
+      "type": "LinkedServiceReference"
+    },
+    "schema": [
+      {
+        "name": "Week",
+        "type": "Int32"
+      },
+      {
+        "name": "Category",
+        "type": "String"
+      },
+      {
+        "name": "Market",
+        "type": "String"
+      },
+      {
+        "name": "Current_Week_Volume",
+        "type": "Decimal"
+      },
+      {
+        "name": "Current_Week_Price",
+        "type": "Decimal"
+      },
+      {
+        "name": "Previous_Year_Volume",
+        "type": "Decimal"
+      },
+      {
+        "name": "Previous_Year_Price",
+        "type": "Decimal"
+      },
+      {
+        "name": "YTD_Current_Volume",
+        "type": "Decimal"
+      },
+      {
+        "name": "YTD_Current_Price",
+        "type": "Decimal"
+      },
+      {
+        "name": "YTD_Previous_Volume",
+        "type": "Decimal"
+      },
+      {
+        "name": "YTD_Previous_Price",
+        "type": "Decimal"
+      },
+      {
+        "name": "Volume_Growth_Percent",
+        "type": "Decimal"
+      },
+      {
+        "name": "Price_Change_Percent",
+        "type": "Decimal"
+      },
+      {
+        "name": "Processing_Date",
+        "type": "DateTime"
+      }
+    ]
+  }
+}
+

@@ -1,0 +1,22 @@
+{
+  "name": "AzureDataLakeStorageGen2",
+  "properties": {
+    "type": "AzureBlobFS",
+    "typeProperties": {
+      "url": "https://@linkedService().storageAccountName.dfs.core.windows.net",
+      "accountKey": {
+        "type": "SecureString",
+        "value": "@linkedService().storageAccountKey"
+      }
+    },
+    "parameters": {
+      "storageAccountName": {
+        "type": "string"
+      },
+      "storageAccountKey": {
+        "type": "string"
+      }
+    }
+  }
+}
+

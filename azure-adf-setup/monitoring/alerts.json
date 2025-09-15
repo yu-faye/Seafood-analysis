@@ -1,0 +1,105 @@
+{
+  "alerts": [
+    {
+      "name": "SeafoodPipelineFailure",
+      "type": "PipelineFailure",
+      "description": "Alert when the seafood data processing pipeline fails",
+      "conditions": {
+        "pipelineName": "SeafoodDataProcessingPipeline",
+        "status": "Failed"
+      },
+      "actions": {
+        "email": ["admin@company.com"],
+        "webhook": "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK"
+      },
+      "severity": "High"
+    },
+    {
+      "name": "DataVolumeDrop",
+      "type": "DataVolume",
+      "description": "Alert when processed data volume drops below threshold",
+      "conditions": {
+        "metric": "RecordCount",
+        "operator": "LessThan",
+        "threshold": 1000
+      },
+      "actions": {
+        "email": ["data-team@company.com"]
+      },
+      "severity": "Medium"
+    },
+    {
+      "name": "PriceAnomaly",
+      "type": "PriceAnomaly",
+      "description": "Alert when price changes exceed normal range",
+      "conditions": {
+        "metric": "PriceChangePercent",
+        "operator": "GreaterThan",
+        "threshold": 20
+      },
+      "actions": {
+        "email": ["analysts@company.com"]
+      },
+      "severity": "Medium"
+    },
+    {
+      "name": "ProcessingDelay",
+      "type": "ProcessingDelay",
+      "description": "Alert when pipeline takes longer than expected",
+      "conditions": {
+        "metric": "Duration",
+        "operator": "GreaterThan",
+        "threshold": 3600
+      },
+      "actions": {
+        "email": ["ops@company.com"]
+      },
+      "severity": "Low"
+    }
+  ],
+  "dashboards": [
+    {
+      "name": "SeafoodAnalysisDashboard",
+      "description": "Main dashboard for seafood analysis monitoring",
+      "widgets": [
+        {
+          "type": "KPI",
+          "title": "Pipeline Success Rate",
+          "metric": "SuccessRate",
+          "timeRange": "24h"
+        },
+        {
+          "type": "Chart",
+          "title": "Data Volume Trends",
+          "metric": "RecordCount",
+          "timeRange": "7d",
+          "chartType": "Line"
+        },
+        {
+          "type": "Table",
+          "title": "Recent Pipeline Runs",
+          "dataSource": "PipelineRuns",
+          "columns": ["StartTime", "Status", "Duration", "RecordsProcessed"]
+        }
+      ]
+    }
+  ],
+  "logAnalytics": {
+    "workspace": "seafood-analysis-logs",
+    "queries": [
+      {
+        "name": "PipelinePerformance",
+        "query": "ADFPipelineRun | where PipelineName == 'SeafoodDataProcessingPipeline' | summarize avg(DurationInMs) by bin(TimeGenerated, 1h)"
+      },
+      {
+        "name": "ErrorAnalysis",
+        "query": "ADFPipelineRun | where Status == 'Failed' | summarize count() by Error"
+      },
+      {
+        "name": "DataQuality",
+        "query": "CustomLog | where SourceSystem == 'SeafoodAnalysis' | summarize count() by QualityScore"
+      }
+    ]
+  }
+}
+

@@ -1,0 +1,262 @@
+{
+  "name": "SeafoodDataProcessingPipeline",
+  "properties": {
+    "activities": [
+      {
+        "name": "DownloadSeafoodData",
+        "type": "WebActivity",
+        "dependsOn": [],
+        "policy": {
+          "timeout": "7.00:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "url": "https://en.seafood.no/market-insight/statistics-archive/",
+          "method": "GET",
+          "headers": {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+          }
+        }
+      },
+      {
+        "name": "ParseAndTransformData",
+        "type": "DatabricksNotebook",
+        "dependsOn": [
+          {
+            "activity": "DownloadSeafoodData",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "7.00:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "notebookPath": "/seafood-analysis/parse-seafood-data",
+          "baseParameters": {
+            "storage_account": "@pipeline().parameters.storageAccount",
+            "container_name": "raw-data",
+            "output_path": "/mnt/processed-data/seafood_export_analysis.csv"
+          }
+        }
+      },
+      {
+        "name": "LoadToDataLake",
+        "type": "Copy",
+        "dependsOn": [
+          {
+            "activity": "ParseAndTransformData",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "7.00:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "source": {
+            "type": "DelimitedTextSource",
+            "storeSettings": {
+              "type": "AzureBlobFSReadSettings",
+              "recursive": true,
+              "enablePartitionDiscovery": false
+            },
+            "formatSettings": {
+              "type": "DelimitedTextReadSettings"
+            }
+          },
+          "sink": {
+            "type": "DelimitedTextSink",
+            "storeSettings": {
+              "type": "AzureBlobFSWriteSettings"
+            },
+            "formatSettings": {
+              "type": "DelimitedTextWriteSettings",
+              "quoteAllText": true,
+              "fileExtension": ".csv"
+            }
+          },
+          "enableStaging": false,
+          "translator": {
+            "type": "TabularTranslator",
+            "mappings": [
+              {
+                "source": {
+                  "name": "Week",
+                  "type": "Int32"
+                },
+                "sink": {
+                  "name": "Week",
+                  "type": "Int32"
+                }
+              },
+              {
+                "source": {
+                  "name": "Category",
+                  "type": "String"
+                },
+                "sink": {
+                  "name": "Category",
+                  "type": "String"
+                }
+              },
+              {
+                "source": {
+                  "name": "Market",
+                  "type": "String"
+                },
+                "sink": {
+                  "name": "Market",
+                  "type": "String"
+                }
+              },
+              {
+                "source": {
+                  "name": "Current_Week_Volume",
+                  "type": "Decimal"
+                },
+                "sink": {
+                  "name": "Current_Week_Volume",
+                  "type": "Decimal"
+                }
+              },
+              {
+                "source": {
+                  "name": "Current_Week_Price",
+                  "type": "Decimal"
+                },
+                "sink": {
+                  "name": "Current_Week_Price",
+                  "type": "Decimal"
+                }
+              }
+            ]
+          }
+        },
+        "inputs": [
+          {
+            "referenceName": "RawSeafoodData",
+            "type": "DatasetReference"
+          }
+        ],
+        "outputs": [
+          {
+            "referenceName": "ProcessedSeafoodData",
+            "type": "DatasetReference"
+          }
+        ]
+      },
+      {
+        "name": "LoadToSQLDatabase",
+        "type": "Copy",
+        "dependsOn": [
+          {
+            "activity": "LoadToDataLake",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "7.00:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "source": {
+            "type": "DelimitedTextSource",
+            "storeSettings": {
+              "type": "AzureBlobFSReadSettings",
+              "recursive": true,
+              "enablePartitionDiscovery": false
+            },
+            "formatSettings": {
+              "type": "DelimitedTextReadSettings"
+            }
+          },
+          "sink": {
+            "type": "SqlSink",
+            "writeBatchSize": 10000,
+            "tableOption": "autoCreate"
+          },
+          "enableStaging": false
+        },
+        "inputs": [
+          {
+            "referenceName": "ProcessedSeafoodData",
+            "type": "DatasetReference"
+          }
+        ],
+        "outputs": [
+          {
+            "referenceName": "SeafoodAnalysisTable",
+            "type": "DatasetReference"
+          }
+        ]
+      },
+      {
+        "name": "GenerateInsights",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          {
+            "activity": "LoadToSQLDatabase",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "7.00:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "storedProcedureName": "sp_GenerateSeafoodInsights",
+          "storedProcedureParameters": {
+            "ProcessingDate": {
+              "value": "@utcnow()",
+              "type": "DateTime"
+            }
+          }
+        },
+        "linkedServiceName": {
+          "referenceName": "AzureSqlDatabase",
+          "type": "LinkedServiceReference"
+        }
+      }
+    ],
+    "parameters": {
+      "storageAccount": {
+        "type": "string",
+        "defaultValue": "seafooddatalake"
+      }
+    },
+    "folder": {
+      "name": "SeafoodAnalysis"
+    },
+    "annotations": [
+      "seafood",
+      "norwegian",
+      "export",
+      "analysis"
+    ]
+  }
+}
+

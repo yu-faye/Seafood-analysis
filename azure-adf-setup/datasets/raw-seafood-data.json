@@ -1,0 +1,71 @@
+{
+  "name": "RawSeafoodData",
+  "properties": {
+    "type": "DelimitedText",
+    "typeProperties": {
+      "location": {
+        "type": "AzureBlobFSLocation",
+        "fileSystem": "raw-data",
+        "folderPath": "norwegian-seafood",
+        "fileName": "*.xlsx"
+      },
+      "columnDelimiter": ",",
+      "rowDelimiter": "\n",
+      "encoding": "UTF-8",
+      "escapeChar": "\\",
+      "firstRowAsHeader": false,
+      "quoteChar": "\""
+    },
+    "linkedServiceName": {
+      "referenceName": "AzureDataLakeStorageGen2",
+      "type": "LinkedServiceReference"
+    },
+    "schema": [
+      {
+        "name": "Column1",
+        "type": "String"
+      },
+      {
+        "name": "Column2", 
+        "type": "String"
+      },
+      {
+        "name": "Column3",
+        "type": "String"
+      },
+      {
+        "name": "Column4",
+        "type": "String"
+      },
+      {
+        "name": "Column5",
+        "type": "String"
+      },
+      {
+        "name": "Column6",
+        "type": "String"
+      },
+      {
+        "name": "Column7",
+        "type": "String"
+      },
+      {
+        "name": "Column8",
+        "type": "String"
+      },
+      {
+        "name": "Column9",
+        "type": "String"
+      },
+      {
+        "name": "Column10",
+        "type": "String"
+      },
+      {
+        "name": "Column11",
+        "type": "String"
+      }
+    ]
+  }
+}
+

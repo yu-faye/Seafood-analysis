@@ -1,0 +1,111 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "dataFactoryName": {
+      "type": "string",
+      "defaultValue": "seafood-analysis-adf",
+      "metadata": {
+        "description": "Name of the Azure Data Factory"
+      }
+    },
+    "storageAccountName": {
+      "type": "string",
+      "defaultValue": "seafooddatalake",
+      "metadata": {
+        "description": "Name of the Azure Storage Account"
+      }
+    },
+    "sqlServerName": {
+      "type": "string",
+      "defaultValue": "seafood-sql-server",
+      "metadata": {
+        "description": "Name of the Azure SQL Server"
+      }
+    },
+    "sqlDatabaseName": {
+      "type": "string",
+      "defaultValue": "seafood-analysis-db",
+      "metadata": {
+        "description": "Name of the Azure SQL Database"
+      }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "West Europe",
+      "metadata": {
+        "description": "Location for all resources"
+      }
+    }
+  },
+  "variables": {
+    "storageAccountId": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+    "sqlServerId": "[resourceId('Microsoft.Sql/servers', parameters('sqlServerName'))]",
+    "sqlDatabaseId": "[resourceId('Microsoft.Sql/servers/databases', parameters('sqlServerName'), parameters('sqlDatabaseName'))]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.DataFactory/factories",
+      "apiVersion": "2018-06-01",
+      "name": "[parameters('dataFactoryName')]",
+      "location": "[parameters('location')]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {}
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2021-09-01",
+      "name": "[parameters('storageAccountName')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2",
+      "properties": {
+        "isHnsEnabled": true,
+        "accessTier": "Hot"
+      }
+    },
+    {
+      "type": "Microsoft.Sql/servers",
+      "apiVersion": "2021-02-01-preview",
+      "name": "[parameters('sqlServerName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "administratorLogin": "seafoodadmin",
+        "administratorLoginPassword": "[newGuid()]"
+      }
+    },
+    {
+      "type": "Microsoft.Sql/servers/databases",
+      "apiVersion": "2021-02-01-preview",
+      "name": "[parameters('sqlDatabaseName')]",
+      "parent": "[resourceId('Microsoft.Sql/servers', parameters('sqlServerName'))]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Basic",
+        "tier": "Basic"
+      },
+      "properties": {
+        "collation": "SQL_Latin1_General_CP1_CI_AS"
+      }
+    }
+  ],
+  "outputs": {
+    "dataFactoryName": {
+      "type": "string",
+      "value": "[parameters('dataFactoryName')]"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "value": "[parameters('storageAccountName')]"
+    },
+    "sqlServerName": {
+      "type": "string",
+      "value": "[parameters('sqlServerName')]"
+    }
+  }
+}
+

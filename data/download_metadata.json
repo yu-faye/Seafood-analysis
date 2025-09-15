@@ -1,0 +1,59 @@
+{
+  "download_date": "2025-09-14T18:07:07.937422",
+  "total_files": 6,
+  "total_size_bytes": 107695,
+  "files_by_type": {
+    "general": 6
+  },
+  "downloaded_files": [
+    {
+      "filename": "template---application---budget.xlsx",
+      "url": "https://en.seafood.no/globalassets/markedsforing/merkeordninger/bedriftsinitiativ/vedlegg-bi-eng/template---application---budget.xlsx",
+      "size": 20522,
+      "path": "data\\template---application---budget.xlsx",
+      "type": "general",
+      "source_page": "https://en.seafood.no/marketing/NSCs-Joint-Marketing-Program/"
+    },
+    {
+      "filename": "template---report---budget.xlsx",
+      "url": "https://en.seafood.no/globalassets/markedsforing/bedriftsinitativ/template---report---budget.xlsx",
+      "size": 20605,
+      "path": "data\\template---report---budget.xlsx",
+      "type": "general",
+      "source_page": "https://en.seafood.no/marketing/NSCs-Joint-Marketing-Program/"
+    },
+    {
+      "filename": "ukestat-laks-og-orret-uke-36.xlsx",
+      "url": "https://en.seafood.no/globalassets/markedsinnsikt/apne-rapporter/ukestatistikk/2025/ukestat-laks-og-orret-uke-36.xlsx",
+      "size": 25956,
+      "path": "data\\ukestat-laks-og-orret-uke-36.xlsx",
+      "type": "general",
+      "source_page": "https://en.seafood.no/market-insight/norwegian-trade/week/"
+    },
+    {
+      "filename": "ukestat-sild-og-makrell-uke-36.xlsx",
+      "url": "https://en.seafood.no/globalassets/markedsinnsikt/apne-rapporter/ukestatistikk/2025/ukestat-sild-og-makrell-uke-36.xlsx",
+      "size": 11647,
+      "path": "data\\ukestat-sild-og-makrell-uke-36.xlsx",
+      "type": "general",
+      "source_page": "https://en.seafood.no/market-insight/norwegian-trade/week/"
+    },
+    {
+      "filename": "ukestat-hvitfiskprodukter-uke-36.xlsx",
+      "url": "https://en.seafood.no/globalassets/markedsinnsikt/apne-rapporter/ukestatistikk/2025/ukestat-hvitfiskprodukter-uke-36.xlsx",
+      "size": 19524,
+      "path": "data\\ukestat-hvitfiskprodukter-uke-36.xlsx",
+      "type": "general",
+      "source_page": "https://en.seafood.no/market-insight/norwegian-trade/week/"
+    },
+    {
+      "filename": "ukestat-konvensjonelle-produkter-uke-36.xlsx",
+      "url": "https://en.seafood.no/globalassets/markedsinnsikt/apne-rapporter/ukestatistikk/2025/ukestat-konvensjonelle-produkter-uke-36.xlsx",
+      "size": 9441,
+      "path": "data\\ukestat-konvensjonelle-produkter-uke-36.xlsx",
+      "type": "general",
+      "source_page": "https://en.seafood.no/market-insight/norwegian-trade/week/"
+    }
+  ],
+  "failed_downloads": []
+}
