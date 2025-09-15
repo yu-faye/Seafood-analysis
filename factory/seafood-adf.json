@@ -1,0 +1,9 @@
+{
+	"name": "seafood-adf",
+	"location": "germanywestcentral",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "5600c583-2b7c-4cdc-b261-b9185c58854e",
+		"tenantId": "adee44b2-91fc-40f1-abdd-9cc29351b5fd"
+	}
+}
