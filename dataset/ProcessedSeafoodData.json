@@ -10,6 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
+				"fileName": "ukestat-hvitfiskprodukter-uke-18.xlsx",
 				"folderPath": "norwegian-seafood",
 				"fileSystem": "raw-data"
 			},
