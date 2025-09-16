@@ -1,0 +1,22 @@
+{
+  "name": "GlobalFishingWatchAPI",
+  "properties": {
+    "type": "RestService",
+    "typeProperties": {
+      "url": "https://gateway.api.globalfishingwatch.org",
+      "enableServerCertificateValidation": true,
+      "authenticationType": "Anonymous"
+    },
+    "parameters": {
+      "apiToken": {
+        "type": "string"
+      }
+    },
+    "annotations": [
+      "Global Fishing Watch API v3",
+      "Fishing Events",
+      "Port Visits"
+    ]
+  }
+}
+

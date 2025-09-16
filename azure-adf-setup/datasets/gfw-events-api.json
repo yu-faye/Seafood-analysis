@@ -1,0 +1,28 @@
+{
+  "name": "GFWEventsAPI",
+  "properties": {
+    "type": "RestResource",
+    "typeProperties": {
+      "relativeUrl": "/v3/events",
+      "requestMethod": "GET",
+      "additionalHeaders": {
+        "Authorization": "Bearer @{linkedService().apiToken}",
+        "Content-Type": "application/json"
+      },
+      "requestBody": {
+        "datasets": ["public-global-fishing-events:v3.0"],
+        "start-date": "@formatDateTime(addDays(utcnow(), -30), 'yyyy-MM-dd')",
+        "end-date": "@formatDateTime(utcnow(), 'yyyy-MM-dd')",
+        "event-types": ["port_visit", "fishing"],
+        "limit": 10000,
+        "format": "json"
+      }
+    },
+    "linkedServiceName": {
+      "referenceName": "GlobalFishingWatchAPI",
+      "type": "LinkedServiceReference"
+    },
+    "schema": []
+  }
+}
+

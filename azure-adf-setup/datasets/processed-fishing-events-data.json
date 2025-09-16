@@ -1,0 +1,87 @@
+{
+  "name": "ProcessedFishingEventsData",
+  "properties": {
+    "type": "DelimitedText",
+    "typeProperties": {
+      "location": {
+        "type": "AzureBlobFSLocation",
+        "fileSystem": "processed-data",
+        "folderPath": "fishing-events",
+        "fileName": "processed_fishing_events.csv"
+      },
+      "columnDelimiter": ",",
+      "rowDelimiter": "\n",
+      "encoding": "UTF-8",
+      "escapeChar": "\\",
+      "firstRowAsHeader": true,
+      "quoteChar": "\""
+    },
+    "linkedServiceName": {
+      "referenceName": "AzureDataLakeStorageGen2",
+      "type": "LinkedServiceReference"
+    },
+    "schema": [
+      {
+        "name": "event_id",
+        "type": "String"
+      },
+      {
+        "name": "event_type",
+        "type": "String"
+      },
+      {
+        "name": "vessel_id",
+        "type": "String"
+      },
+      {
+        "name": "vessel_name",
+        "type": "String"
+      },
+      {
+        "name": "vessel_flag",
+        "type": "String"
+      },
+      {
+        "name": "vessel_class",
+        "type": "String"
+      },
+      {
+        "name": "port_id",
+        "type": "String"
+      },
+      {
+        "name": "port_name",
+        "type": "String"
+      },
+      {
+        "name": "port_country",
+        "type": "String"
+      },
+      {
+        "name": "port_latitude",
+        "type": "Decimal"
+      },
+      {
+        "name": "port_longitude",
+        "type": "Decimal"
+      },
+      {
+        "name": "start_time",
+        "type": "DateTime"
+      },
+      {
+        "name": "end_time",
+        "type": "DateTime"
+      },
+      {
+        "name": "duration_hours",
+        "type": "Decimal"
+      },
+      {
+        "name": "processing_date",
+        "type": "DateTime"
+      }
+    ]
+  }
+}
+

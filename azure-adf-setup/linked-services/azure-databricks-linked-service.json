@@ -1,0 +1,31 @@
+{
+  "name": "AzureDatabricks",
+  "properties": {
+    "type": "AzureDatabricks",
+    "typeProperties": {
+      "domain": "https://@{linkedService().databricksWorkspaceUrl}",
+      "accessToken": {
+        "type": "SecureString",
+        "value": "@{linkedService().databricksAccessToken}"
+      },
+      "existingClusterId": "@{linkedService().clusterId}"
+    },
+    "parameters": {
+      "databricksWorkspaceUrl": {
+        "type": "string"
+      },
+      "databricksAccessToken": {
+        "type": "string"
+      },
+      "clusterId": {
+        "type": "string"
+      }
+    },
+    "annotations": [
+      "Azure Databricks",
+      "Data Processing",
+      "Fishing Events Processing"
+    ]
+  }
+}
+

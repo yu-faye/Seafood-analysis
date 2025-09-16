@@ -1,0 +1,387 @@
+{
+  "name": "FishingEventsDataProcessingPipeline",
+  "properties": {
+    "description": "Pipeline to fetch and process Global Fishing Watch API v3 events data for port visit analysis and investment insights",
+    "activities": [
+      {
+        "name": "FetchFishingEvents",
+        "type": "WebActivity",
+        "dependsOn": [],
+        "policy": {
+          "timeout": "7.00:00:00",
+          "retry": 3,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": true
+        },
+        "typeProperties": {
+          "url": "https://gateway.api.globalfishingwatch.org/v3/events",
+          "method": "GET",
+          "headers": {
+            "Authorization": {
+              "value": "@concat('Bearer ', pipeline().parameters.gfwApiToken)",
+              "type": "Expression"
+            },
+            "Content-Type": "application/json"
+          },
+          "body": {
+            "datasets": ["public-global-fishing-events:v3.0"],
+            "start-date": "@formatDateTime(addDays(utcnow(), -30), 'yyyy-MM-dd')",
+            "end-date": "@formatDateTime(utcnow(), 'yyyy-MM-dd')",
+            "event-types": ["port_visit", "fishing"],
+            "limit": 10000,
+            "format": "json"
+          }
+        }
+      },
+      {
+        "name": "StoreRawEventsData",
+        "type": "Copy",
+        "dependsOn": [
+          {
+            "activity": "FetchFishingEvents",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "7.00:00:00",
+          "retry": 2,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "source": {
+            "type": "RestSource",
+            "httpRequestTimeout": "00:01:40",
+            "requestInterval": "00.00:00:00.010",
+            "requestMethod": "GET",
+            "additionalHeaders": {
+              "Authorization": "@concat('Bearer ', pipeline().parameters.gfwApiToken)"
+            }
+          },
+          "sink": {
+            "type": "JsonSink",
+            "storeSettings": {
+              "type": "AzureBlobFSWriteSettings"
+            },
+            "formatSettings": {
+              "type": "JsonWriteSettings"
+            }
+          },
+          "enableStaging": false
+        },
+        "inputs": [
+          {
+            "referenceName": "GFWEventsAPI",
+            "type": "DatasetReference"
+          }
+        ],
+        "outputs": [
+          {
+            "referenceName": "RawFishingEventsData",
+            "type": "DatasetReference",
+            "parameters": {
+              "fileName": "@concat('fishing_events_', formatDateTime(utcnow(), 'yyyyMMdd_HHmmss'), '.json')"
+            }
+          }
+        ]
+      },
+      {
+        "name": "ProcessFishingEventsData",
+        "type": "DatabricksNotebook",
+        "dependsOn": [
+          {
+            "activity": "StoreRawEventsData",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "7.00:00:00",
+          "retry": 2,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "notebookPath": "/fishing-analysis/process-fishing-events",
+          "baseParameters": {
+            "storage_account": "@pipeline().parameters.storageAccount",
+            "input_container": "raw-data",
+            "output_container": "processed-data",
+            "processing_date": "@formatDateTime(utcnow(), 'yyyy-MM-dd')"
+          }
+        },
+        "linkedServiceName": {
+          "referenceName": "AzureDatabricks",
+          "type": "LinkedServiceReference"
+        }
+      },
+      {
+        "name": "LoadPortVisitData",
+        "type": "Copy",
+        "dependsOn": [
+          {
+            "activity": "ProcessFishingEventsData",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "7.00:00:00",
+          "retry": 2,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "source": {
+            "type": "DelimitedTextSource",
+            "storeSettings": {
+              "type": "AzureBlobFSReadSettings",
+              "recursive": true,
+              "enablePartitionDiscovery": false
+            },
+            "formatSettings": {
+              "type": "DelimitedTextReadSettings"
+            }
+          },
+          "sink": {
+            "type": "SqlSink",
+            "writeBatchSize": 10000,
+            "tableOption": "autoCreate",
+            "sqlWriterStoredProcedureName": "sp_UpsertFishingEvents",
+            "sqlWriterTableType": "FishingEventsTableType"
+          },
+          "enableStaging": false,
+          "translator": {
+            "type": "TabularTranslator",
+            "mappings": [
+              {
+                "source": {
+                  "name": "event_id",
+                  "type": "String"
+                },
+                "sink": {
+                  "name": "EventId",
+                  "type": "String"
+                }
+              },
+              {
+                "source": {
+                  "name": "event_type",
+                  "type": "String"
+                },
+                "sink": {
+                  "name": "EventType",
+                  "type": "String"
+                }
+              },
+              {
+                "source": {
+                  "name": "vessel_id",
+                  "type": "String"
+                },
+                "sink": {
+                  "name": "VesselId",
+                  "type": "String"
+                }
+              },
+              {
+                "source": {
+                  "name": "port_id",
+                  "type": "String"
+                },
+                "sink": {
+                  "name": "PortId",
+                  "type": "String"
+                }
+              },
+              {
+                "source": {
+                  "name": "port_name",
+                  "type": "String"
+                },
+                "sink": {
+                  "name": "PortName",
+                  "type": "String"
+                }
+              },
+              {
+                "source": {
+                  "name": "port_country",
+                  "type": "String"
+                },
+                "sink": {
+                  "name": "PortCountry",
+                  "type": "String"
+                }
+              },
+              {
+                "source": {
+                  "name": "start_time",
+                  "type": "DateTime"
+                },
+                "sink": {
+                  "name": "StartTime",
+                  "type": "DateTime"
+                }
+              },
+              {
+                "source": {
+                  "name": "end_time",
+                  "type": "DateTime"
+                },
+                "sink": {
+                  "name": "EndTime",
+                  "type": "DateTime"
+                }
+              },
+              {
+                "source": {
+                  "name": "duration_hours",
+                  "type": "Decimal"
+                },
+                "sink": {
+                  "name": "DurationHours",
+                  "type": "Decimal"
+                }
+              },
+              {
+                "source": {
+                  "name": "vessel_class",
+                  "type": "String"
+                },
+                "sink": {
+                  "name": "VesselClass",
+                  "type": "String"
+                }
+              },
+              {
+                "source": {
+                  "name": "vessel_flag",
+                  "type": "String"
+                },
+                "sink": {
+                  "name": "VesselFlag",
+                  "type": "String"
+                }
+              }
+            ]
+          }
+        },
+        "inputs": [
+          {
+            "referenceName": "ProcessedFishingEventsData",
+            "type": "DatasetReference"
+          }
+        ],
+        "outputs": [
+          {
+            "referenceName": "FishingEventsTable",
+            "type": "DatasetReference"
+          }
+        ]
+      },
+      {
+        "name": "GeneratePortAnalysisInsights",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          {
+            "activity": "LoadPortVisitData",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "7.00:00:00",
+          "retry": 2,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "storedProcedureName": "sp_GeneratePortAnalysisInsights",
+          "storedProcedureParameters": {
+            "ProcessingDate": {
+              "value": "@utcnow()",
+              "type": "DateTime"
+            },
+            "AnalysisPeriodDays": {
+              "value": 30,
+              "type": "Int32"
+            }
+          }
+        },
+        "linkedServiceName": {
+          "referenceName": "AzureSqlDatabase",
+          "type": "LinkedServiceReference"
+        }
+      },
+      {
+        "name": "GenerateInvestmentInsights",
+        "type": "SqlServerStoredProcedure",
+        "dependsOn": [
+          {
+            "activity": "GeneratePortAnalysisInsights",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "7.00:00:00",
+          "retry": 2,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "storedProcedureName": "sp_GenerateInvestmentInsights",
+          "storedProcedureParameters": {
+            "ProcessingDate": {
+              "value": "@utcnow()",
+              "type": "DateTime"
+            }
+          }
+        },
+        "linkedServiceName": {
+          "referenceName": "AzureSqlDatabase",
+          "type": "LinkedServiceReference"
+        }
+      }
+    ],
+    "parameters": {
+      "storageAccount": {
+        "type": "string",
+        "defaultValue": "seafooddatalake"
+      },
+      "gfwApiToken": {
+        "type": "string",
+        "defaultValue": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImtpZEtleSJ9.eyJkYXRhIjp7Im5hbWUiOiJuZXciLCJ1c2VySWQiOjUwNDgyLCJhcHBsaWNhdGlvbk5hbWUiOiJuZXciLCJpZCI6MzI3NSwidHlwZSI6InVzZXItYXBwbGljYXRpb24ifSwiaWF0IjoxNzU3OTczMTE4LCJleHAiOjIwNzMzMzMxMTgsImF1ZCI6ImdmdyIsImlzcyI6ImdmdyJ9.JO69wN-szT7MAhryP1VZiFXwMoUpxrse66z4VfJrJ0NQSjX_H02HibWz0IX3FjCTsxfKz4ukKAumD9GY6Dc43hH_g3DOzo5hY8HjWeXaCWabpc6tkBKzyuj6cZzz5b3rEfe1hAgwsV177LOzB9xZCVel_hFaFR2PtyhAn1XLdOLBwtTNQqGMKeDsHbRmEdp9uIPUaTNzmXZnNHrJNljY2KvdQ7VBSufLtS_Lg00App3sfAI0QxWbK89Hz1xtsYALjowAqY5YNQttHChdFVzmhAq8wp_IymGfJmBemRLuk6nhRsVvTqgke_Fd_ewpTz0_oJ3bAubIEsK1Kx689tk0_mc6XTuDiTHWa96ncPEtdWCbktFqvgOfwDEYlLe-SUsCQvz_PFC9NH4NENH9xiN545Z4_CASTZveJdH3EynKysZXoxUKSbH92K1CVHqxdkC9m_SU7aWqhXZ8oDPE9RUaqZ7N-f1h1AkJKxlNUCBQKw8jhfjnNNRKEYuDsXG6J_sU"
+      }
+    },
+    "variables": {
+      "processingDate": {
+        "type": "String",
+        "defaultValue": "@formatDateTime(utcnow(), 'yyyy-MM-dd')"
+      }
+    },
+    "folder": {
+      "name": "FishingAnalysis"
+    },
+    "annotations": [
+      "fishing",
+      "globalfishingwatch",
+      "port_visit",
+      "investment_analysis"
+    ]
+  }
+}
+
