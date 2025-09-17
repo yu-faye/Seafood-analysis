@@ -130,12 +130,17 @@
               "startDate": "@formatDateTime(addDays(utcnow(), -30), 'yyyy-MM-dd')",
               "endDate": "@formatDateTime(utcnow(), 'yyyy-MM-dd')",
               "timeseriesInterval": "DAY"
-            }
+            },
+            "url": "https://gateway.api.globalfishingwatch.org/v3/events/stats"
           },
           "sink": {
             "type": "AzureSqlSink",
             "writeBatchSize": 10000,
-            "preCopyScript": "IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[FishingEvents]') AND type in (N'U')) BEGIN CREATE TABLE [dbo].[FishingEvents] ( [EventId] NVARCHAR(100) NULL, [EventType] NVARCHAR(50) NULL, [VesselId] NVARCHAR(100) NULL, [PortId] NVARCHAR(50) NULL, [PortName] NVARCHAR(200) NULL, [StartTime] DATETIME2 NULL, [DurationHours] DECIMAL(18,4) NULL ) END"
+            "preCopyScript": "IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[FishingEvents]') AND type in (N'U')) BEGIN CREATE TABLE [dbo].[FishingEvents] ( [EventId] NVARCHAR(100) NULL, [EventType] NVARCHAR(50) NULL, [VesselId] NVARCHAR(100) NULL, [PortId] NVARCHAR(50) NULL, [PortName] NVARCHAR(200) NULL, [StartTime] DATETIME2 NULL, [DurationHours] DECIMAL(18,4) NULL ) END",
+            "linkedServiceName": {
+              "referenceName": "AzureSqlDatabase",
+              "type": "LinkedServiceReference"
+            }
           },
           "enableStaging": false,
           "translator": {
@@ -214,18 +219,8 @@
             ]
           }
         },
-        "inputs": [
-          {
-            "referenceName": "GFWEventsAPI",
-            "type": "DatasetReference"
-          }
-        ],
-        "outputs": [
-          {
-            "referenceName": "FishingEventsTable",
-            "type": "DatasetReference"
-          }
-        ]
+        "inputs": [],
+        "outputs": []
       },
       {
         "name": "GeneratePortAnalysisInsights",
