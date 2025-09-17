@@ -218,7 +218,10 @@
         "inputs": [
           {
             "referenceName": "GFWEventsAPI",
-            "type": "DatasetReference"
+            "type": "DatasetReference",
+            "parameters": {
+              "gfwApiToken": "@variables('gfwToken')"
+            }
           }
         ],
         "outputs": [
