@@ -3,7 +3,7 @@
   "properties": {
     "type": "AzureSqlDatabase",
     "typeProperties": {
-      "connectionString": "integrated security=False;encrypt=True;connection timeout=30;data source=seafood-sql-server.database.windows.net;initial catalog=seafood-analysis-db;user id=seafoodadmin",
+      "connectionString": "integrated security=False;encrypt=True;connection timeout=30;data source=seafood-sql-server.database.windows.net;initial catalog=seafood-analysis-db;user id=yufei",
       "password": {
         "type": "AzureKeyVaultSecret",
         "store": {
