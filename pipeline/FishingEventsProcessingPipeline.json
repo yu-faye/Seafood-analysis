@@ -50,7 +50,7 @@
           "method": "POST",
           "headers": {
             "Authorization": {
-              "value": "@concat('Bearer ', variables('gfwToken'))",
+              "value": "@concat('Bearer ', activity('GetGfwApiToken').output.value)",
               "type": "Expression"
             },
             "Accept": "application/json",
