@@ -154,7 +154,7 @@
 						"Content-Type": "application/json"
 					},
 					"requestBody": {
-						"value": "@concat('{\"confidences\": [\"3\", \"4\"], \"datasets\": [\"public-global-port-visits-events:latest\"], \"startDate\": \"', formatDateTime(addDays(utcnow(), -30), 'yyyy-MM-dd'), '\", \"endDate\": \"', formatDateTime(utcnow(), 'yyyy-MM-dd'), '\", \"timeseriesInterval\": \"DAY\"}')",
+						"value": "@concat('{\"confidences\": [\"3\", \"4\"], \"datasets\": [\"public-global-port-visits-events:latest\"], \"startDate\": \"2023-01-01\", \"endDate\": \"2025-01-01\", \"timeseriesInterval\": \"DAY\"}')",
 						"type": "Expression"
 					}
 				}
@@ -630,7 +630,7 @@
 								"requestInterval": "00.00:00:00.010",
 								"requestMethod": "POST",
 								"requestBody": {
-									"value": "@concat('{\"confidences\": [\"3\", \"4\"], \"datasets\": [\"public-global-port-visits-events:latest\"], \"startDate\": \"', formatDateTime(addDays(utcnow(), -30), 'yyyy-MM-dd'), '\", \"endDate\": \"', formatDateTime(utcnow(), 'yyyy-MM-dd'), '\", \"timeseriesInterval\": \"DAY\"}')",
+									"value": "@concat('{\"confidences\": [\"3\", \"4\"], \"datasets\": [\"public-global-port-visits-events:latest\"], \"startDate\": \"2023-01-01\", \"endDate\": \"2025-01-01\", \"timeseriesInterval\": \"DAY\"}')",
 									"type": "Expression"
 								},
 								"additionalHeaders": {
