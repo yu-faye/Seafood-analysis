@@ -4,9 +4,62 @@
     "description": "Pipeline to fetch and process Global Fishing Watch fishing events data for port visit analysis",
     "activities": [
       {
+        "name": "GetGfwApiToken",
+        "type": "WebActivity",
+        "dependsOn": [],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 3,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": true
+        },
+        "typeProperties": {
+          "url": "https://seafood-analysis-kv.vault.azure.net/secrets/GfwApiToken?api-version=7.4",
+          "method": "GET",
+          "authentication": {
+            "type": "MSI",
+            "resource": "https://vault.azure.net"
+          }
+        }
+      },
+      {
+        "name": "SetGfwToken",
+        "type": "SetVariable",
+        "dependsOn": [
+          {
+            "activity": "GetGfwApiToken",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
+        "policy": {
+          "timeout": "0.12:00:00",
+          "retry": 0,
+          "retryIntervalInSeconds": 30,
+          "secureOutput": false,
+          "secureInput": false
+        },
+        "typeProperties": {
+          "variableName": "gfwToken",
+          "value": {
+            "value": "@activity('GetGfwApiToken').output.value",
+            "type": "Expression"
+          }
+        }
+      },
+      {
         "name": "FetchFishingEventsFromGFW",
         "type": "Copy",
-        "dependsOn": [],
+        "dependsOn": [
+          {
+            "activity": "SetGfwToken",
+            "dependencyConditions": [
+              "Succeeded"
+            ]
+          }
+        ],
         "policy": {
           "timeout": "0.12:00:00",
           "retry": 3,
@@ -23,7 +76,7 @@
             "requestMethod": "GET",
             "additionalHeaders": {
               "Authorization": {
-                "value": "@concat('Bearer ', pipeline().parameters.gfwApiToken)",
+                "value": "@concat('Bearer ', variables('gfwToken'))",
                 "type": "Expression"
               }
             }
@@ -216,12 +269,12 @@
       }
     ],
     "parameters": {
-      "gfwApiToken": {
-        "type": "string",
-        "defaultValue": "your-gfw-api-token-here"
-      }
+      
     },
     "variables": {
+      "gfwToken": {
+        "type": "String"
+      },
       "processingDate": {
         "type": "String",
         "defaultValue": "@formatDateTime(utcnow(), 'yyyy-MM-dd')"
