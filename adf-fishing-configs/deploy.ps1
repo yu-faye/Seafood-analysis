@@ -1,5 +1,6 @@
 # 一键部署Global Fishing Watch分析到现有ADF
 # 针对您的具体资源：seafood-adf, seafoodddatalake, seafood-sql-server等
+# API Token将安全存储在Key Vault中
 
 param(
     [Parameter(Mandatory=$true)]
@@ -19,6 +20,7 @@ $StorageAccountName = "seafoodddatalake"
 $SqlServerName = "seafood-sql-server"
 $SqlDatabaseName = "seafood-analysis-db"
 $SqlUsername = "seafoodadmin"
+$KeyVaultName = "seafood-analysis-kv"
 
 Write-Host "🐟 部署Global Fishing Watch分析到您的ADF" -ForegroundColor Green
 Write-Host "=" * 60
@@ -28,6 +30,7 @@ Write-Host "  Data Factory: $DataFactoryName" -ForegroundColor White
 Write-Host "  Storage Account: $StorageAccountName" -ForegroundColor White
 Write-Host "  SQL Server: $SqlServerName" -ForegroundColor White
 Write-Host "  SQL Database: $SqlDatabaseName" -ForegroundColor White
+Write-Host "  Key Vault: $KeyVaultName" -ForegroundColor White
 Write-Host ""
 
 # 检查Azure CLI登录
@@ -36,6 +39,28 @@ if (-not (az account show 2>$null)) {
     exit 1
 }
 Write-Host "✅ Azure CLI已登录" -ForegroundColor Green
+
+# 创建或验证Key Vault
+Write-Host "🔐 设置Key Vault..." -ForegroundColor Yellow
+$kvExists = az keyvault show --name $KeyVaultName --resource-group $ResourceGroupName 2>$null
+if (-not $kvExists) {
+    Write-Host "📦 创建Key Vault: $KeyVaultName" -ForegroundColor Yellow
+    az keyvault create --name $KeyVaultName --resource-group $ResourceGroupName --location "West Europe" --output none
+    Write-Host "✅ Key Vault已创建" -ForegroundColor Green
+} else {
+    Write-Host "✅ Key Vault已存在" -ForegroundColor Green
+}
+
+# 存储GFW API Token到Key Vault
+Write-Host "🔑 存储API Token到Key Vault..." -ForegroundColor Yellow
+az keyvault secret set --vault-name $KeyVaultName --name "GFWApiToken" --value $GFWApiToken --output none
+Write-Host "✅ API Token已安全存储" -ForegroundColor Green
+
+# 如果提供了SQL密码，也存储到Key Vault
+if (-not [string]::IsNullOrEmpty($SqlPassword)) {
+    az keyvault secret set --vault-name $KeyVaultName --name "SqlPassword" --value $SqlPassword --output none
+    Write-Host "✅ SQL密码已存储到Key Vault" -ForegroundColor Green
+}
 
 # 获取存储账户密钥（如果未提供）
 if ([string]::IsNullOrEmpty($StorageAccountKey)) {
@@ -62,6 +87,10 @@ foreach ($container in $containers) {
 
 # 部署链接服务
 Write-Host "🔗 部署链接服务..." -ForegroundColor Yellow
+
+# 部署Key Vault链接服务
+az datafactory linked-service create --resource-group $ResourceGroupName --factory-name $DataFactoryName --name "AzureKeyVault" --file ".\linkedServices\AzureKeyVault.json" --output none
+Write-Host "✅ Key Vault链接服务已部署" -ForegroundColor Green
 
 # 更新存储链接服务
 $storageLS = Get-Content ".\linkedServices\AzureDataLakeStorage.json" | ConvertFrom-Json
@@ -91,9 +120,24 @@ if (-not [string]::IsNullOrEmpty($SqlPassword)) {
     Write-Host "⚠️ 跳过SQL链接服务（未提供密码）" -ForegroundColor Yellow
 }
 
-# 部署GFW API链接服务
-az datafactory linked-service create --resource-group $ResourceGroupName --factory-name $DataFactoryName --name "GlobalFishingWatchAPI" --file ".\linkedServices\GlobalFishingWatchAPI.json" --output none
-Write-Host "✅ GFW API链接服务已部署" -ForegroundColor Green
+# 部署GFW API链接服务（使用Key Vault中的token）
+$gfwLS = Get-Content ".\linkedServices\GlobalFishingWatchAPI.json" | ConvertFrom-Json
+$gfwLS.properties.parameters.gfwApiToken = @{
+    "type" = "string"
+    "defaultValue" = @{
+        "type" = "AzureKeyVaultSecret"
+        "store" = @{
+            "referenceName" = "AzureKeyVault"
+            "type" = "LinkedServiceReference"
+        }
+        "secretName" = "GFWApiToken"
+    }
+}
+$gfwLS | ConvertTo-Json -Depth 10 | Out-File "temp-gfw-ls.json" -Encoding UTF8
+
+az datafactory linked-service create --resource-group $ResourceGroupName --factory-name $DataFactoryName --name "GlobalFishingWatchAPI" --file "temp-gfw-ls.json" --output none
+Remove-Item "temp-gfw-ls.json"
+Write-Host "✅ GFW API链接服务已部署（使用Key Vault）" -ForegroundColor Green
 
 # 部署数据集
 Write-Host "📊 部署数据集..." -ForegroundColor Yellow
