@@ -20,6 +20,10 @@
           "authentication": {
             "type": "MSI",
             "resource": "https://vault.azure.net"
+          },
+          "connectVia": {
+            "referenceName": "AzureKeyVault",
+            "type": "LinkedServiceReference"
           }
         }
       },
@@ -87,7 +91,8 @@
               "port_visit",
               "fishing"
             ],
-            "limit": 10,
+            "limit": 1000,
+            "offset": 0,
             "format": "json"
           }
         }
