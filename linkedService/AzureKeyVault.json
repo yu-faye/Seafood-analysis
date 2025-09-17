@@ -5,6 +5,6 @@
     "typeProperties": {
       "baseUrl": "https://seafood-analysis-kv.vault.azure.net/"
     },
-    "description": "Azure Key Vault for storing secrets"
+    "description": "Azure Key Vault for storing secrets including GFW API Token and Storage Account Key"
   }
 }

@@ -7,7 +7,7 @@
       "requestMethod": "GET",
       "additionalHeaders": {
         "Authorization": {
-          "value": "@concat('Bearer ', pipeline().parameters.gfwApiToken)",
+          "value": "@concat('Bearer ', linkedService().gfwApiToken)",
           "type": "Expression"
         },
         "Content-Type": "application/json"

@@ -1,0 +1,5 @@
+{
+  "gfwApiToken": "YOUR_GFW_API_TOKEN_HERE",
+  "sqlPassword": "YOUR_SQL_PASSWORD_HERE",
+  "storageAccountKey": "YOUR_STORAGE_ACCOUNT_KEY_HERE"
+}

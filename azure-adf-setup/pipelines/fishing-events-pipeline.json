@@ -364,7 +364,7 @@
       },
       "gfwApiToken": {
         "type": "string",
-        "defaultValue": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImtpZEtleSJ9.eyJkYXRhIjp7Im5hbWUiOiJuZXciLCJ1c2VySWQiOjUwNDgyLCJhcHBsaWNhdGlvbk5hbWUiOiJuZXciLCJpZCI6MzI3NSwidHlwZSI6InVzZXItYXBwbGljYXRpb24ifSwiaWF0IjoxNzU3OTczMTE4LCJleHAiOjIwNzMzMzMxMTgsImF1ZCI6ImdmdyIsImlzcyI6ImdmdyJ9.JO69wN-szT7MAhryP1VZiFXwMoUpxrse66z4VfJrJ0NQSjX_H02HibWz0IX3FjCTsxfKz4ukKAumD9GY6Dc43hH_g3DOzo5hY8HjWeXaCWabpc6tkBKzyuj6cZzz5b3rEfe1hAgwsV177LOzB9xZCVel_hFaFR2PtyhAn1XLdOLBwtTNQqGMKeDsHbRmEdp9uIPUaTNzmXZnNHrJNljY2KvdQ7VBSufLtS_Lg00App3sfAI0QxWbK89Hz1xtsYALjowAqY5YNQttHChdFVzmhAq8wp_IymGfJmBemRLuk6nhRsVvTqgke_Fd_ewpTz0_oJ3bAubIEsK1Kx689tk0_mc6XTuDiTHWa96ncPEtdWCbktFqvgOfwDEYlLe-SUsCQvz_PFC9NH4NENH9xiN545Z4_CASTZveJdH3EynKysZXoxUKSbH92K1CVHqxdkC9m_SU7aWqhXZ8oDPE9RUaqZ7N-f1h1AkJKxlNUCBQKw8jhfjnNNRKEYuDsXG6J_sU"
+        "defaultValue": ""
       }
     },
     "variables": {
