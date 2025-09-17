@@ -5,14 +5,20 @@
 		"factoryName": {
 			"value": "seafood-adf"
 		},
-		"AzureDataLakeStorage1_accountKey": {
-			"value": ""
+		"AzureSqlDatabase_connectionString": {
+			"value": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=seafood-sql-server.database.windows.net;Initial Catalog=seafood-analysis-db;User ID=yufei"
 		},
 		"AzureSqlDatabase1_password": {
 			"value": ""
 		},
+		"AzureDataLakeStorage_properties_typeProperties_url": {
+			"value": "https://seafoodddatalake.dfs.core.windows.net"
+		},
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
 			"value": "https://seafoodddatalake.dfs.core.windows.net/"
+		},
+		"AzureKeyVault_properties_typeProperties_baseUrl": {
+			"value": "https://seafood-analysis-kv.vault.azure.net/"
 		},
 		"AzureSqlDatabase1_properties_typeProperties_server": {
 			"value": "seafood-sql-server.database.windows.net"
@@ -22,6 +28,9 @@
 		},
 		"AzureSqlDatabase1_properties_typeProperties_userName": {
 			"value": "yufei"
+		},
+		"GlobalFishingWatchAPI_properties_typeProperties_url": {
+			"value": "https://gateway.api.globalfishingwatch.org"
 		},
 		"containerUri": {
 			"value": ""

@@ -7,17 +7,22 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "seafood-adf"
 		},
-		"AzureDataLakeStorage1_accountKey": {
-			"type": "secureString",
-			"metadata": "Secure string for 'accountKey' of 'AzureDataLakeStorage1'"
-		},
 		"AzureSqlDatabase1_password": {
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'AzureSqlDatabase1'"
 		},
+		"AzureSqlDatabase_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureSqlDatabase'",
+			"defaultValue": "Integrated Security=False;Encrypt=True;Connection Timeout=30;Data Source=seafood-sql-server.database.windows.net;Initial Catalog=seafood-analysis-db;User ID=yufei"
+		},
 		"AzureDataLakeStorage1_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://seafoodddatalake.dfs.core.windows.net/"
+		},
+		"AzureKeyVault_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://seafood-analysis-kv.vault.azure.net/"
 		},
 		"AzureSqlDatabase1_properties_typeProperties_server": {
 			"type": "string",
@@ -30,6 +35,14 @@
 		"AzureSqlDatabase1_properties_typeProperties_userName": {
 			"type": "string",
 			"defaultValue": "yufei"
+		},
+		"GlobalFishingWatchAPI_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://gateway.api.globalfishingwatch.org"
+		},
+		"AzureDataLakeStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://seafoodddatalake.dfs.core.windows.net"
 		}
 	},
 	"variables": {
@@ -44,11 +57,21 @@
 				"annotations": [],
 				"type": "AzureBlobFS",
 				"typeProperties": {
-					"url": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]",
-					"accountKey": {
-						"type": "SecureString",
-						"value": "[parameters('AzureDataLakeStorage1_accountKey')]"
-					}
+					"url": "[parameters('AzureDataLakeStorage1_properties_typeProperties_url')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureKeyVault')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Azure Key Vault for storing secrets including GFW API Token and Storage Account Key",
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('AzureKeyVault_properties_typeProperties_baseUrl')]"
 				}
 			},
 			"dependsOn": []
@@ -76,6 +99,22 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/GlobalFishingWatchAPI')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Global Fishing Watch API v3 for fishing events data",
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('GlobalFishingWatchAPI_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Anonymous"
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/integrationRuntime1')]",
 			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
 			"apiVersion": "2018-06-01",
@@ -94,6 +133,35 @@
 				"typeProperties": {}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/GFWEventsAPI')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Global Fishing Watch Events API dataset",
+				"linkedServiceName": {
+					"referenceName": "GlobalFishingWatchAPI",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {
+					"relativeUrl": "/v3/events/stats",
+					"requestMethod": "POST",
+					"additionalHeaders": {
+						"Accept": "application/json",
+						"Content-Type": "application/json"
+					},
+					"requestBody": {
+						"value": "@concat('{\"confidences\": [\"3\", \"4\"], \"datasets\": [\"public-global-port-visits-events:latest\"], \"startDate\": \"', formatDateTime(addDays(utcnow(), -30), 'yyyy-MM-dd'), '\", \"endDate\": \"', formatDateTime(utcnow(), 'yyyy-MM-dd'), '\", \"timeseriesInterval\": \"DAY\"}')",
+						"type": "Expression"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/GlobalFishingWatchAPI')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/ProcessedSeafoodData')]",
@@ -122,6 +190,54 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureDataLakeStorage')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Azure Data Lake Storage Gen2 for seafood fishing data",
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('AzureDataLakeStorage_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureKeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "StorageAccountKey"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVault')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureSqlDatabase')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Azure SQL Database for seafood fishing analysis",
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('AzureSqlDatabase_connectionString')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureKeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "SqlPassword"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVault')]"
 			]
 		},
 		{
@@ -251,6 +367,328 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/ProcessedSeafoodData')]",
 				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/FishingEventsTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "SQL table for storing fishing events data",
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"preCopyScript": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"structure": [
+					{
+						"name": "EventId",
+						"type": "String"
+					},
+					{
+						"name": "EventType",
+						"type": "String"
+					},
+					{
+						"name": "VesselId",
+						"type": "String"
+					},
+					{
+						"name": "PortId",
+						"type": "String"
+					},
+					{
+						"name": "PortName",
+						"type": "String"
+					},
+					{
+						"name": "StartTime",
+						"type": "DateTime"
+					},
+					{
+						"name": "DurationHours",
+						"type": "Decimal"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "FishingEvents"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ProcessedFishingEventsData')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Processed fishing events data in CSV format",
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "processed_fishing_events.csv",
+						"folderPath": "fishing-events",
+						"fileSystem": "processed-data"
+					},
+					"columnDelimiter": ",",
+					"rowDelimiter": "\n",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\"",
+					"encoding": "UTF-8"
+				},
+				"schema": [
+					{
+						"name": "event_id",
+						"type": "String"
+					},
+					{
+						"name": "event_type",
+						"type": "String"
+					},
+					{
+						"name": "vessel_id",
+						"type": "String"
+					},
+					{
+						"name": "vessel_name",
+						"type": "String"
+					},
+					{
+						"name": "vessel_flag",
+						"type": "String"
+					},
+					{
+						"name": "port_id",
+						"type": "String"
+					},
+					{
+						"name": "port_name",
+						"type": "String"
+					},
+					{
+						"name": "port_country",
+						"type": "String"
+					},
+					{
+						"name": "start_time",
+						"type": "DateTime"
+					},
+					{
+						"name": "end_time",
+						"type": "DateTime"
+					},
+					{
+						"name": "duration_hours",
+						"type": "Decimal"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/RawFishingEventsData')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Raw fishing events data from GFW API stored in Data Lake",
+				"linkedServiceName": {
+					"referenceName": "AzureDataLakeStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat('fishing_events_', formatDateTime(utcnow(), 'yyyyMMdd_HHmmss'), '.json')",
+							"type": "Expression"
+						},
+						"folderPath": "fishing-events",
+						"fileSystem": "raw-data"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureDataLakeStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/FishingEventsProcessingPipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"description": "Pipeline to fetch and process Global Fishing Watch fishing events data for port visit analysis",
+				"activities": [
+					{
+						"name": "GetGfwApiToken",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 3,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": true
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "GET",
+							"headers": {},
+							"url": "https://seafood-analysis-kv.vault.azure.net/secrets/gfwapitoken?api-version=7.4",
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://vault.azure.net"
+							}
+						}
+					},
+					{
+						"name": "FetchFishingEventsFromGFW",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "GetGfwApiToken",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 3,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"method": "POST",
+							"headers": {
+								"Authorization": {
+									"value": "@concat('Bearer ', activity('GetGfwApiToken').output.value)",
+									"type": "Expression"
+								},
+								"Accept": "application/json",
+								"Content-Type": "application/json"
+							},
+							"url": "https://gateway.api.globalfishingwatch.org/v3/events/stats",
+							"body": {
+								"confidences": [
+									"3",
+									"4"
+								],
+								"datasets": [
+									"public-global-port-visits-events:latest"
+								],
+								"startDate": "@formatDateTime(addDays(utcnow(), -30), 'yyyy-MM-dd')",
+								"endDate": "@formatDateTime(utcnow(), 'yyyy-MM-dd')",
+								"timeseriesInterval": "DAY"
+							}
+						}
+					},
+					{
+						"name": "LoadFishingEventsToSQL",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "FetchFishingEventsFromGFW",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 2,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "POST",
+								"requestBody": {
+									"value": "@concat('{\"confidences\": [\"3\", \"4\"], \"datasets\": [\"public-global-port-visits-events:latest\"], \"startDate\": \"', formatDateTime(addDays(utcnow(), -30), 'yyyy-MM-dd'), '\", \"endDate\": \"', formatDateTime(utcnow(), 'yyyy-MM-dd'), '\", \"timeseriesInterval\": \"DAY\"}')",
+									"type": "Expression"
+								},
+								"additionalHeaders": {
+									"Authorization": {
+										"value": "@concat('Bearer ', activity('GetGfwApiToken').output.value)",
+										"type": "Expression"
+									},
+									"Accept": "application/json",
+									"Content-Type": "application/json"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBatchSize": 10000,
+								"preCopyScript": "IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[FishingEvents]') AND type in (N'U')) BEGIN CREATE TABLE [dbo].[FishingEvents] ( [EventId] NVARCHAR(100) NULL, [EventType] NVARCHAR(50) NULL, [VesselId] NVARCHAR(100) NULL, [PortId] NVARCHAR(50) NULL, [PortName] NVARCHAR(200) NULL, [StartTime] DATETIME2 NULL, [DurationHours] DECIMAL(18,4) NULL ) END"
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "GFWEventsAPI",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "FishingEventsTable",
+								"type": "DatasetReference",
+								"parameters": {
+									"preCopyScript": "IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[FishingEvents]') AND type in (N'U')) BEGIN CREATE TABLE [dbo].[FishingEvents] ( [EventId] NVARCHAR(100) NULL, [EventType] NVARCHAR(50) NULL, [VesselId] NVARCHAR(100) NULL, [PortId] NVARCHAR(50) NULL, [PortName] NVARCHAR(200) NULL, [StartTime] DATETIME2 NULL, [DurationHours] DECIMAL(18,4) NULL ) END"
+								}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"variables": {
+					"processingDate": {
+						"type": "String",
+						"defaultValue": "@formatDateTime(utcnow(), 'yyyy-MM-dd')"
+					}
+				},
+				"folder": {
+					"name": "FishingAnalysis"
+				},
+				"annotations": [
+					"fishing",
+					"port_visit",
+					"investment_analysis",
+					"gfw"
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/GFWEventsAPI')]",
+				"[concat(variables('factoryId'), '/datasets/FishingEventsTable')]"
 			]
 		},
 		{
