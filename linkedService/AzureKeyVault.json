@@ -1,10 +1,11 @@
 {
-  "name": "AzureKeyVault",
-  "properties": {
-    "type": "AzureKeyVault",
-    "typeProperties": {
-      "baseUrl": "https://seafood-analysis-kv.vault.azure.net/"
-    },
-    "description": "Azure Key Vault for storing secrets including GFW API Token and Storage Account Key"
-  }
+	"name": "AzureKeyVault",
+	"properties": {
+		"description": "Azure Key Vault for storing secrets including GFW API Token and Storage Account Key",
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://seafood-analysis-kv.vault.azure.net/"
+		}
+	}
 }
