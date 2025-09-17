@@ -197,7 +197,10 @@
         "outputs": [
           {
             "referenceName": "FishingEventsTable",
-            "type": "DatasetReference"
+            "type": "DatasetReference",
+            "parameters": {
+              "preCopyScript": "IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[FishingEvents]') AND type in (N'U')) BEGIN CREATE TABLE [dbo].[FishingEvents] ( [EventId] NVARCHAR(100) NULL, [EventType] NVARCHAR(50) NULL, [VesselId] NVARCHAR(100) NULL, [PortId] NVARCHAR(50) NULL, [PortName] NVARCHAR(200) NULL, [StartTime] DATETIME2 NULL, [DurationHours] DECIMAL(18,4) NULL ) END"
+            }
           }
         ]
       },
