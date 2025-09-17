@@ -111,34 +111,8 @@
         },
         "userProperties": [],
         "typeProperties": {
-          "source": {
-            "type": "RestSource",
-            "httpRequestTimeout": "00:01:40",
-            "requestInterval": "00.00:00:00.010",
-            "requestMethod": "POST",
-            "additionalHeaders": {
-              "Authorization": {
-                "value": "@concat('Bearer ', variables('gfwToken'))",
-                "type": "Expression"
-              },
-              "Accept": "application/json",
-              "Content-Type": "application/json"
-            },
-            "requestBody": {
-              "confidences": ["3", "4"],
-              "datasets": ["public-global-port-visits-events:latest"],
-              "startDate": "@formatDateTime(addDays(utcnow(), -30), 'yyyy-MM-dd')",
-              "endDate": "@formatDateTime(utcnow(), 'yyyy-MM-dd')",
-              "timeseriesInterval": "DAY"
-            },
-            "url": "https://gateway.api.globalfishingwatch.org/v3/events/stats"
-          },
-          "sink": {
-            "type": "AzureSqlSink",
-            "writeBatchSize": 10000,
-            "preCopyScript": "IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[FishingEvents]') AND type in (N'U')) BEGIN CREATE TABLE [dbo].[FishingEvents] ( [EventId] NVARCHAR(100) NULL, [EventType] NVARCHAR(50) NULL, [VesselId] NVARCHAR(100) NULL, [PortId] NVARCHAR(50) NULL, [PortName] NVARCHAR(200) NULL, [StartTime] DATETIME2 NULL, [DurationHours] DECIMAL(18,4) NULL ) END"
-          },
           "enableStaging": false,
+          "preCopyScript": "IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[FishingEvents]') AND type in (N'U')) BEGIN CREATE TABLE [dbo].[FishingEvents] ( [EventId] NVARCHAR(100) NULL, [EventType] NVARCHAR(50) NULL, [VesselId] NVARCHAR(100) NULL, [PortId] NVARCHAR(50) NULL, [PortName] NVARCHAR(200) NULL, [StartTime] DATETIME2 NULL, [DurationHours] DECIMAL(18,4) NULL ) END",
           "translator": {
             "type": "TabularTranslator",
             "mappings": [

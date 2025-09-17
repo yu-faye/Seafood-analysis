@@ -6,6 +6,36 @@
       "schema": "dbo",
       "table": "FishingEvents"
     },
+    "structure": [
+      {
+        "name": "EventId",
+        "type": "String"
+      },
+      {
+        "name": "EventType",
+        "type": "String"
+      },
+      {
+        "name": "VesselId",
+        "type": "String"
+      },
+      {
+        "name": "PortId",
+        "type": "String"
+      },
+      {
+        "name": "PortName",
+        "type": "String"
+      },
+      {
+        "name": "StartTime",
+        "type": "DateTime"
+      },
+      {
+        "name": "DurationHours",
+        "type": "Decimal"
+      }
+    ],
     "linkedServiceName": {
       "referenceName": "AzureSqlDatabase",
       "type": "LinkedServiceReference"
