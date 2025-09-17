@@ -6,10 +6,6 @@
       "relativeUrl": "/v3/events/stats",
       "requestMethod": "POST",
       "additionalHeaders": {
-        "Authorization": {
-          "value": "@concat('Bearer ', parameters().gfwApiToken)",
-          "type": "Expression"
-        },
         "Accept": "application/json",
         "Content-Type": "application/json"
       },
@@ -24,11 +20,6 @@
     "linkedServiceName": {
       "referenceName": "GlobalFishingWatchAPI",
       "type": "LinkedServiceReference"
-    },
-    "parameters": {
-      "gfwApiToken": {
-        "type": "string"
-      }
     },
     "description": "Global Fishing Watch Events API dataset"
   }
