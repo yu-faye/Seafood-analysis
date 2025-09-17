@@ -7,11 +7,6 @@
       "enableServerCertificateValidation": true,
       "authenticationType": "Anonymous"
     },
-    "parameters": {
-      "gfwApiToken": {
-        "type": "string"
-      }
-    },
     "description": "Global Fishing Watch API v3 for fishing events data"
   }
 }

@@ -28,37 +28,11 @@
         }
       },
       {
-        "name": "SetGfwToken",
-        "type": "SetVariable",
-        "dependsOn": [
-          {
-            "activity": "GetGfwApiToken",
-            "dependencyConditions": [
-              "Succeeded"
-            ]
-          }
-        ],
-        "policy": {
-          "timeout": "0.12:00:00",
-          "retry": 0,
-          "retryIntervalInSeconds": 30,
-          "secureOutput": false,
-          "secureInput": false
-        },
-        "typeProperties": {
-          "variableName": "gfwToken",
-          "value": {
-            "value": "@activity('GetGfwApiToken').output.value",
-            "type": "Expression"
-          }
-        }
-      },
-      {
         "name": "FetchFishingEventsFromGFW",
         "type": "WebActivity",
         "dependsOn": [
           {
-            "activity": "SetGfwToken",
+            "activity": "GetGfwApiToken",
             "dependencyConditions": [
               "Succeeded"
             ]
@@ -193,7 +167,7 @@
             "referenceName": "GFWEventsAPI",
             "type": "DatasetReference",
             "parameters": {
-              "gfwApiToken": "@variables('gfwToken')"
+              "gfwApiToken": "@activity('GetGfwApiToken').output.value"
             }
           }
         ],
@@ -248,9 +222,6 @@
       
     },
     "variables": {
-      "gfwToken": {
-        "type": "String"
-      },
       "processingDate": {
         "type": "String",
         "defaultValue": "@formatDateTime(utcnow(), 'yyyy-MM-dd')"

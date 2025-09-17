@@ -25,6 +25,11 @@
       "referenceName": "GlobalFishingWatchAPI",
       "type": "LinkedServiceReference"
     },
+    "parameters": {
+      "gfwApiToken": {
+        "type": "string"
+      }
+    },
     "description": "Global Fishing Watch Events API dataset"
   }
 }
