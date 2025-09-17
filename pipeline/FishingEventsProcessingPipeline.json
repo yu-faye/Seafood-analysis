@@ -15,7 +15,7 @@
           "secureInput": true
         },
         "typeProperties": {
-          "url": "https://seafood-analysis-kv.vault.azure.net/secrets/GfwApiToken?api-version=7.4",
+          "url": "https://seafood-analysis-kv.vault.azure.net/secrets/gfwapitoken?api-version=7.4",
           "method": "GET",
           "authentication": {
             "type": "MSI",
