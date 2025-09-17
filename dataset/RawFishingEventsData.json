@@ -1,0 +1,22 @@
+{
+  "name": "RawFishingEventsData",
+  "properties": {
+    "type": "Json",
+    "typeProperties": {
+      "location": {
+        "type": "AzureBlobFSLocation",
+        "fileSystem": "raw-data",
+        "folderPath": "fishing-events",
+        "fileName": {
+          "value": "@concat('fishing_events_', formatDateTime(utcnow(), 'yyyyMMdd_HHmmss'), '.json')",
+          "type": "Expression"
+        }
+      }
+    },
+    "linkedServiceName": {
+      "referenceName": "AzureDataLakeStorage",
+      "type": "LinkedServiceReference"
+    },
+    "description": "Raw fishing events data from GFW API stored in Data Lake"
+  }
+}

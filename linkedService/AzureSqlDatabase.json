@@ -1,0 +1,18 @@
+{
+  "name": "AzureSqlDatabase",
+  "properties": {
+    "type": "AzureSqlDatabase",
+    "typeProperties": {
+      "connectionString": "integrated security=False;encrypt=True;connection timeout=30;data source=seafood-sql-server.database.windows.net;initial catalog=seafood-analysis-db;user id=seafoodadmin",
+      "password": {
+        "type": "AzureKeyVaultSecret",
+        "store": {
+          "referenceName": "AzureKeyVault",
+          "type": "LinkedServiceReference"
+        },
+        "secretName": "SqlPassword"
+      }
+    },
+    "description": "Azure SQL Database for seafood fishing analysis"
+  }
+}

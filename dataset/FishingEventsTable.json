@@ -1,0 +1,15 @@
+{
+  "name": "FishingEventsTable",
+  "properties": {
+    "type": "AzureSqlTable",
+    "typeProperties": {
+      "schema": "dbo",
+      "table": "FishingEvents"
+    },
+    "linkedServiceName": {
+      "referenceName": "AzureSqlDatabase",
+      "type": "LinkedServiceReference"
+    },
+    "description": "SQL table for storing fishing events data"
+  }
+}

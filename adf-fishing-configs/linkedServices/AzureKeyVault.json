@@ -1,0 +1,10 @@
+{
+  "name": "AzureKeyVault",
+  "properties": {
+    "type": "AzureKeyVault",
+    "typeProperties": {
+      "baseUrl": "https://seafood-analysis-kv.vault.azure.net/"
+    },
+    "description": "Azure Key Vault for storing secrets"
+  }
+}

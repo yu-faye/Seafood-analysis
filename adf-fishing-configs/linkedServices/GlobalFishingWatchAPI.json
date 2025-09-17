@@ -1,0 +1,12 @@
+{
+  "name": "GlobalFishingWatchAPI",
+  "properties": {
+    "type": "RestService",
+    "typeProperties": {
+      "url": "https://gateway.api.globalfishingwatch.org",
+      "enableServerCertificateValidation": true,
+      "authenticationType": "Anonymous"
+    },
+    "description": "Global Fishing Watch API v3 for fishing events data"
+  }
+}
