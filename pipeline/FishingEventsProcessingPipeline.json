@@ -73,12 +73,32 @@
             "type": "RestSource",
             "httpRequestTimeout": "00:01:40",
             "requestInterval": "00.00:00:00.010",
-            "requestMethod": "GET",
+            "requestMethod": "POST",
             "additionalHeaders": {
               "Authorization": {
                 "value": "@concat('Bearer ', variables('gfwToken'))",
                 "type": "Expression"
-              }
+              },
+              "Content-Type": "application/json"
+            },
+            "requestBody": {
+              "datasets": [
+                "public-global-fishing-events:v3.0"
+              ],
+              "start-date": {
+                "value": "@formatDateTime(addDays(utcnow(), -30), 'yyyy-MM-dd')",
+                "type": "Expression"
+              },
+              "end-date": {
+                "value": "@formatDateTime(utcnow(), 'yyyy-MM-dd')",
+                "type": "Expression"
+              },
+              "event-types": [
+                "port_visit",
+                "fishing"
+              ],
+              "limit": 10000,
+              "format": "json"
             }
           },
           "sink": {
