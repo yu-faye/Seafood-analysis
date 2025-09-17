@@ -72,28 +72,14 @@
           "secureInput": false
         },
         "typeProperties": {
-          "url": "https://gateway.api.globalfishingwatch.org/v3/events",
-          "method": "POST",
+          "url": "@concat('https://gateway.api.globalfishingwatch.org/v3/events?datasets=public-global-fishing-events:v3.0&start-date=', formatDateTime(addDays(utcnow(), -30), 'yyyy-MM-dd'), '&end-date=', formatDateTime(utcnow(), 'yyyy-MM-dd'), '&event-types=port_visit,fishing&limit=1000&offset=0&format=json')",
+          "method": "GET",
           "headers": {
             "Authorization": {
               "value": "@concat('Bearer ', variables('gfwToken'))",
               "type": "Expression"
             },
             "Content-Type": "application/json"
-          },
-          "body": {
-            "datasets": [
-              "public-global-fishing-events:v3.0"
-            ],
-            "start-date": "@formatDateTime(addDays(utcnow(), -30), 'yyyy-MM-dd')",
-            "end-date": "@formatDateTime(utcnow(), 'yyyy-MM-dd')",
-            "event-types": [
-              "port_visit",
-              "fishing"
-            ],
-            "limit": 1000,
-            "offset": 0,
-            "format": "json"
           }
         }
       },

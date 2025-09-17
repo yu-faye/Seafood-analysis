@@ -3,7 +3,7 @@
   "properties": {
     "type": "RestResource",
     "typeProperties": {
-      "relativeUrl": "/v3/events",
+      "relativeUrl": "@concat('/v3/events?datasets=public-global-fishing-events:v3.0&start-date=', formatDateTime(addDays(utcnow(), -30), 'yyyy-MM-dd'), '&end-date=', formatDateTime(utcnow(), 'yyyy-MM-dd'), '&event-types=port_visit,fishing&limit=1000&offset=0&format=json')",
       "requestMethod": "GET",
       "additionalHeaders": {
         "Authorization": {
@@ -11,14 +11,6 @@
           "type": "Expression"
         },
         "Content-Type": "application/json"
-      },
-      "requestBody": {
-        "datasets": ["public-global-fishing-events:v3.0"],
-        "start-date": "@formatDateTime(addDays(utcnow(), -30), 'yyyy-MM-dd')",
-        "end-date": "@formatDateTime(utcnow(), 'yyyy-MM-dd')",
-        "event-types": ["port_visit", "fishing"],
-        "limit": 10000,
-        "format": "json"
       }
     },
     "linkedServiceName": {
