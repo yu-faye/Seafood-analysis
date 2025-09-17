@@ -6,6 +6,11 @@
       "schema": "dbo",
       "table": "FishingEvents"
     },
+    "parameters": {
+      "preCopyScript": {
+        "type": "string"
+      }
+    },
     "structure": [
       {
         "name": "EventId",
