@@ -98,7 +98,7 @@
               "Accept": "application/json",
               "Content-Type": "application/json"
             },
-            "requestBody": "@concat('{\"confidences\": [\"3\", \"4\"], \"datasets\": [\"public-global-port-visits-events:latest\"], \"startDate\": \"', formatDateTime(addDays(utcnow(), -30), 'yyyy-MM-dd'), '\", \"endDate\": \"', formatDateTime(utcnow(), 'yyyy-MM-dd'), '\", \"timeseriesInterval\": \"DAY\"}')"
+            "requestBody": "@concat('{\"confidences\": [\"3\", \"4\"], \"datasets\": [\"public-global-port-visits-events:latest\"], \"startDate\": \"2023-01-01\", \"endDate\": \"2025-01-01\", \"timeseriesInterval\": \"DAY\"}')"
           },
           "sink": {
             "type": "AzureSqlSink",

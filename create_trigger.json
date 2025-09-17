@@ -1,0 +1,28 @@
+{
+  "name": "DailyFishingEventsTrigger",
+  "properties": {
+    "description": "Daily trigger for fishing events data processing",
+    "runtimeState": "Started",
+    "pipelines": [
+      {
+        "pipelineReference": {
+          "referenceName": "FishingEventsProcessingPipeline",
+          "type": "PipelineReference"
+        }
+      }
+    ],
+    "type": "ScheduleTrigger",
+    "typeProperties": {
+      "recurrence": {
+        "frequency": "Day",
+        "interval": 1,
+        "startTime": "2025-09-19T06:00:00Z",
+        "timeZone": "UTC",
+        "schedule": {
+          "hours": [6],
+          "minutes": [0]
+        }
+      }
+    }
+  }
+}
